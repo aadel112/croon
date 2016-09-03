@@ -2,6 +2,7 @@
 
 use Schedule::Cron;
 use Getopt::Std;
+use File::Basename;
 use POSIX::nice;
 use Linux::IO_Prio qw(IOPRIO_WHO_PROCESS IOPRIO_PRIO_VALUE IOPRIO_CLASS_BE ioprio_set);
 
@@ -37,12 +38,20 @@ sub ionice {
 
 
 sub read_config {
-	# processname, niceness, ioniceness
+    my %ret = ();
+	# processname, niceness, ioniceness, profile
     if( -s $CONFIG ) {
         open my $fh, '<', $CONFIG or die "Cannot open $CONFIG: $";
         while ( my $line = <$fh> ) {
             chomp;
-            my
+            my ( $proc, $nice, $ionice, $prof ) = split /,/, $line;
+            my %tmp = (
+                'nice' => $nice,
+                'ionice' => $ionice,
+                'prof' => $prof
+            );
+            $proc = basename( $proc );
+            $ret{$proc} = \%tmp;
         }
         close $fh;
     }
@@ -56,4 +65,5 @@ sub get_opts {
     $CRONFILE = $o{F} ? $o{F} : undef;
     $CONFIG = $o{C} ? $o{C} : undef;
     $DNICE = $o{N} ? $o{N} : 10;
+    $DIO = $o{D} ? $o{D} : 4;
 }
