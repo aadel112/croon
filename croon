@@ -11,16 +11,17 @@
 use Schedule::Cron;
 use Getopt::Std;
 use File::Basename;
+use Data::Dumper;
 
 main();
 
 sub main{
     get_opts();
     %CFG = read_cfg() if( -s $CONFIG );
-    
-    my $cron = new Schedule::Cron(\&dispatcher); 
+   
+    my $cron = new Schedule::Cron(\&dispatcher);
     $cron->load_crontab( $CRONFILE ) or die "Couldn't load your cronfile - $CRONFILE";
-    $cron->run(detach=>1);
+    $cron->run(catch=>1);
 
     return 0;
 }
