@@ -11,8 +11,6 @@
 use Schedule::Cron;
 use Getopt::Std;
 use File::Basename;
-use POSIX::nice;
-use Linux::IO_Prio qw(IOPRIO_WHO_PROCESS IOPRIO_PRIO_VALUE IOPRIO_CLASS_BE ioprio_set);
 
 main();
 
@@ -31,9 +29,9 @@ sub dispatcher {
     my ( $id, @args ) = @_;
 
     # nice the process
-    nice($CFG{$id}->{'nice'} ? $CFG{$id}->{'nice'} : $DNICE) if( !defined( $CFG{$id} ) or $CFG{$id}->{'nice'} !== 0 );
+    nice($CFG{$id}->{'nice'} ? $CFG{$id}->{'nice'} : $DNICE) if( !defined( $CFG{$id} ) or $CFG{$id}->{'nice'});
     #nice the io
-    ionice($CFG{$id}->{'ionice'} ? $CFG{$id}->{'ionice'} : $DIO) if( !defined( $CFG{$id} ) or $CFG{$id}->{'ionice'} !== 0 );
+    ionice($CFG{$id}->{'ionice'} ? $CFG{$id}->{'ionice'} : $DIO) if( !defined( $CFG{$id} ) or $CFG{$id}->{'ionice'});
 
     #TODO
     #profile the proess
@@ -44,14 +42,22 @@ sub dispatcher {
     }
 }
 
+sub nice {
+    my ( $prio ) = @_;
+    my $nice = which('nice');
+    return undef unless( $nice );
+
+    `$nice -n $prio`;
+    return $?;
+}
+
 sub ionice {
 	my ( $prio ) = @_;
-	ioprio_set(
-		IOPRIO_WHO_PROCESS,
-		$$,
-		# IOPRIO_CLASS_BE - best effort (0 is most favourable and 7 is least favourable)
-		IOPRIO_PRIO_VALUE(IOPRIO_CLASS_BE, $prio)
-	);
+    my $ionice = which('ionice');
+    return undef unless( $ionice );
+
+    `$ionice -n$prio`;
+    return $?;
 }
 
 sub which { my $which = `which $_[0]`; chomp $which; return $which; }
@@ -60,7 +66,7 @@ sub read_config {
     my %ret = ();
 	# processname, niceness, ioniceness, profile
     if( -s $CONFIG ) {
-        open my $fh, '<', $CONFIG or die "Cannot open $CONFIG: $";
+        open my $fh, '<', $CONFIG or die "Cannot open $CONFIG: $!";
         while ( my $line = <$fh> ) {
             chomp;
             my ( $proc, $nice, $ionice, $prof ) = split /,/, $line;
