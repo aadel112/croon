@@ -1,2 +1,2 @@
-* * * * * date >> $HOME/croon/examples/test1 2>&1 > /dev/null
+* * * * * * date >> $HOME/croon/examples/test1 2>&1
 #* * * * * `date` >> ./examples/test2 2>&1 > /dev/null

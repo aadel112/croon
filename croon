@@ -18,40 +18,84 @@ main();
 sub main{
     get_opts();
     %CFG = read_cfg() if( -s $CONFIG );
-   
+
     my $cron = new Schedule::Cron(\&dispatcher);
     $cron->load_crontab( $CRONFILE ) or die "Couldn't load your cronfile - $CRONFILE";
-    $cron->run(catch=>1);
+    $cron->run(detach=>1, catch=>1);
 
     return 0;
 }
 
 sub dispatcher {
-    my ( $cmd ) = shift;
+    my $cmd = shift;
 
-    # nice the process
-    nice($CFG{$id}->{'nice'} ? $CFG{$id}->{'nice'} : $DNICE) if( !defined( $CFG{$id} ) or $CFG{$id}->{'nice'});
-    #nice the io
-    ionice($CFG{$id}->{'ionice'} ? $CFG{$id}->{'ionice'} : $DIO) if( !defined( $CFG{$id} ) or $CFG{$id}->{'ionice'});
-
-    #TODO
-    #profile the proess
-    if( !$SKIP_PROFILE or $CFG{$id}->{'prof'} ) {
-        if( which('time') ) {
-            
-        }
-    }
+    my $new_cmd = get_croon_cmd( $cmd );
+#     print "$new_cmd\n";
+    `$new_cmd`;
 }
 
+sub get_croon_cmd {
+    my $cmd = shift;
 
+    my $time = which('time');
+    my $ionice = which('ionice');
+
+    my @actions = get_actions( $cmd );
+
+    foreach my $act ( @actions ) {
+   
+        my $nice = get_nicestr($act);
+
+        $cmd =~ s/$act/$time $nice $ionicestr $act/;
+    }
+    return $cmd;
+}
+
+sub get_actions {
+    my $cmd = shift;
+
+    my @actions = $cmd =~ /(?ips)[^\s\;><|]+/g;
+    my $sz = scalar @actions;
+    for( my $i = $sz - 1; $i >= 0; --$i ) {
+        my $ac = $actions[$i];
+        pop @actions if( !-X $ac && !-X which($ac) );
+    }
+    return @actions;
+}
+
+sub get_nicestr {
+    my $proc = basename( $_[0] );
+
+    my $prio = $CFG{$proc}->{'nice'};
+    $prio = defined $prio ? $prio : $DNICE;
+    return undef unless( $prio );
+
+    return nice( $prio );
+}
+
+sub get_ionicestr {
+    my $proc = basename( $_[0] );
+
+    my $prio = $CFG{$proc}->{'ionice'};
+    $prio = defined $prio ? $prio : $DIO;
+    return undef unless( $prio );
+
+    return ionice( $prio );
+}
+
+sub get_timestr {
+    my $proc = basename( $_[0] );
+    my $time = which('time');
+
+    return $time;
+}
 
 sub nice {
     my ( $prio ) = @_;
     my $nice = which('nice');
     return undef unless( $nice );
 
-    `$nice -n $prio`;
-    return $?;
+    return "$nice -n$prio";
 }
 
 sub ionice {
@@ -59,11 +103,16 @@ sub ionice {
     my $ionice = which('ionice');
     return undef unless( $ionice );
 
-    `$ionice -n$prio`;
-    return $?;
+    return "$ionice -n$prio";
 }
 
-sub which { my $which = `which $_[0]`; chomp $which; return $which; }
+sub which { 
+    return undef if( $_[0] =~ /&/ );
+    my $cmd = "which $_[0] 2>/dev/null";
+    my $which = `$cmd`;
+    chomp $which; 
+    return $which; 
+}
 
 sub read_config {
     my %ret = ();
