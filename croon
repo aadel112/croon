@@ -27,7 +27,7 @@ sub main{
 }
 
 sub dispatcher {
-    my ( $id, @args ) = @_;
+    my ( $cmd ) = shift;
 
     # nice the process
     nice($CFG{$id}->{'nice'} ? $CFG{$id}->{'nice'} : $DNICE) if( !defined( $CFG{$id} ) or $CFG{$id}->{'nice'});
@@ -42,6 +42,8 @@ sub dispatcher {
         }
     }
 }
+
+
 
 sub nice {
     my ( $prio ) = @_;
