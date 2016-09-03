@@ -2,7 +2,8 @@
 
 use Schedule::Cron;
 use Getopt::Std;
-use POSIX;
+use POSIX::nice;
+use Linux::IO_Prio qw(IOPRIO_WHO_PROCESS IOPRIO_PRIO_VALUE IOPRIO_CLASS_BE ioprio_set);
 
 main();
 
@@ -19,17 +20,32 @@ sub dispatcher {
     my ( $id, @args ) = @_;
 
     # nice the process
-    POSIX::nice($DNICE);
+    nice($DNICE);
+    #nice the io
+    ionice($DIO);
 }
 
+sub ionice {
+	my ( $prio ) = @_;
+	ioprio_set(
+		IOPRIO_WHO_PROCESS,
+		$$,
+		# IOPRIO_CLASS_BE - best effort (0 is most favourable and 7 is least favourable)
+		IOPRIO_PRIO_VALUE(IOPRIO_CLASS_BE, 7)
+	);
+}
+
+
 sub read_config {
-	# processname, niceness
-    open my $fh, '<', $CONFIG or die "Cannot open $CONFIG: $";
-	while ( my $line = <$fh> ) {
-		chomp;
-		my
-	}
-	close $fh;
+	# processname, niceness, ioniceness
+    if( -s $CONFIG ) {
+        open my $fh, '<', $CONFIG or die "Cannot open $CONFIG: $";
+        while ( my $line = <$fh> ) {
+            chomp;
+            my
+        }
+        close $fh;
+    }
 
 }
 
