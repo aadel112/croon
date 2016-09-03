@@ -1,0 +1,62 @@
+PGDATABASE=wicdwh
+PGHOST=linux3947
+PERLPGDNS=dbname=wicdwh;host=linux3947;port=5432
+
+# cleanup load files and logs
+#0 2 * * * /home/dwhprod/bin/cleanup_files.sh > /dev/null 2>&1
+
+# move load files to loadready directory
+#0,5,10,15,20,28,30,35,40,45,50,55 * * * * /home/dwhprod/bin/moveloadreadyfiles.sh > /dev/null 2>&1
+
+# etlOptHour
+#48 * * * * . ~dwhprod/.bash_profile && /opt/etl/gp/bin/etlOptHourSummary.sh > /dev/null 2>&1
+
+# etlCallHour
+#47 * * * * . ~dwhprod/.bash_profile && /opt/etl/gp/bin/etlCallHourSummary.pl > /tmp/chsm 2>&1
+
+# etlAsrSummary
+#45 * * * * . ~dwhprod/.bash_profile && /opt/etl/gp/bin/etlAsrSummary.sh > /dev/null 2>&1
+
+# Client Seat data Load
+##00 13 * * * . ~dwhprod/.bash_profile && /opt/etl/gp/bin/etlClientSeatDataLoad.sh > /dev/null 2>&1
+# Client Seat data Load
+##00 13 * * * . ~dwhprod/.bash_profile && /opt/etl/gp/bin/etlClientSeatDataLoad.sh > /dev/null 2>&1
+
+# Client Seat data Load Check
+##1 12 * * * . ~dwhprod/.bash_profile && /opt/etl/gp/bin/etlClientSeatDataLoadCheck.sh > /dev/null 2>&1
+
+# PayPhone Info
+##2 2 * * * . ~dwhprod/.bash_profile && /opt/etl/gp/bin/etlPayPhone.sh > /tmp/out2 2>&1
+
+# Simul_orig Processing
+#15 * * * * . ~dwhprod/.bash_profile && /opt/etl/gp/bin/stgGPSimOLoad.sh > /dev/null 2>&1
+
+# Simul_trans Processing
+#22 * * * * . ~dwhprod/.bash_profile && /opt/etl/gp/bin/stgGPSimTLoad.sh > /dev/null 2>&1
+
+# Sms Facts Hour Summary
+#10,25,40,55 * * * * . ~dwhprod/.bash_profile && /opt/etl/gp/bin/etlSmsFactsHourSummary.sh > /dev/null 2>&1
+
+# Sms Facts Hour Summary Check
+##0 9 * * * . ~dwhprod/.bash_profile && /opt/etl/gp/bin/etlSmsFactsHourSummaryCheck.pl > /dev/null 2>&1
+
+# TuVox Bill Items
+#30 15 * * * . ~dwhprod/.bash_profile && /opt/etl/gp/bin/etlTuVoxBillItemsSummary.sh > /dev/null 2>&1
+
+
+# etlAsrHourChecker.pl - added 12/5/2014 per CO 183983/ADR-2014336173526
+#0 10 * * * . ~dwhprod/.bash_profile && /opt/etl/gp/bin/etlAsrHourChecker.pl > /dev/null 2>&1
+
+# Summary Processing
+#3 * * * * . ~dwhprod/.bash_profile && /opt/etl/gp/bin/runSummaries.sh > /dev/null 2>&1
+
+# CO 140537 changed 01-17-2014 to run hourly
+# CO 132131 ctstaple added 11-25-2013 runs once a day
+###4 3 * * * . ~dwhprod/.bash_profile && /opt/etl/gp/bin/etlComcastRapidResolveLoad.pl > /dev/null 2>&1
+#30 * * * * . ~dwhprod/.bash_profile && /opt/etl/gp/bin/etlComcastRapidResolveLoad.pl > /dev/null 2>&1
+
+# TXL Repeat Caller Custom Segment Summary (runs at 4:00 AM EST in production)
+### DECOMMISIONED 9/9/14:  00 5 * * * . ~dwhprod/.bash_profile && /opt/etl/gp/bin/etlTxlRepeatCallerCustomSegmentSummary.pl > /dev/null 2>&1
+
+# Script to check for unknown bulkloader files
+59 * * * * . ~dwhprod/.bash_profile && /opt/etl/gp/bin/etlLookForUnknownFiles.sh > /dev/null 2>&1

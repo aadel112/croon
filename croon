@@ -38,6 +38,9 @@ sub dispatcher {
     #TODO
     #profile the proess
     if( !$SKIP_PROFILE or $CFG{$id}->{'prof'} ) {
+        if( which('time') ) {
+            
+        }
     }
 }
 
@@ -51,6 +54,7 @@ sub ionice {
 	);
 }
 
+sub which { my $which = `which $_[0]`; chomp $which; return $which; }
 
 sub read_config {
     my %ret = ();
