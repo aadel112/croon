@@ -4,6 +4,9 @@ do 'croon';
 use Test::Simple tests => 1;
 use Data::Dumper;
 
+#test loggimg level
+Log::Log4perl->easy_init($INFO);
+
 test_config();
 
 sub test_config {

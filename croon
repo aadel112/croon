@@ -169,6 +169,8 @@ sub read_cfg {
             $ret{$proc} = \%tmp;
         }
         close $fh;
+    } else {
+        $LOG->warn("Config $CONFIG does not exist");
     }
     return %ret;
 }
