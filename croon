@@ -6,6 +6,7 @@
 # *
 # * Copyright (C) 2016 - aadel112.com - A project by Aaron Adel    
 # */
+package croon;
 
 use Schedule::Cron;
 use Getopt::Std;
@@ -16,8 +17,8 @@ main();
 
 sub main{
     get_opts();
-    %CFG = read_cfg() if( -s $CONFIG );
 
+    %CFG = read_cfg() if( -s $CONFIG );
     $CRON = new Schedule::Cron(\&dispatcher);
     reload();
 }
