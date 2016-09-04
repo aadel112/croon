@@ -1,11 +1,11 @@
 #!/usr/bin/env perl
 
 do 'croon';
-use Test::Simple tests => 10;
+use Test::Simple tests => 12;
 use Data::Dumper;
 
 #test loggimg level
-Log::Log4perl->easy_init($INFO);
+# Log::Log4perl->easy_init($INFO);
 
 $CONFIG = 'tests/conf.1';
 %CFG = read_cfg();
@@ -31,7 +31,9 @@ sub test_croon_cmd {
         my @args = $e{'args'};
         my $cmd = $args[0][0];
         my $new_cmd = dispatcher( $cmd, 1 );
-#         print "$new_cmd\n";
+        ok( $new_cmd =~ $cmd, "New cmd contains original cmd" );
+        my $rc = system( $new_cmd );
+        ok( !$rc, "Return code was 0 for cmd");
     }
 }
 
