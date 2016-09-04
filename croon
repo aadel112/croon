@@ -21,7 +21,8 @@ sub main{
 
     my $cron = new Schedule::Cron(\&dispatcher);
     $cron->load_crontab( $CRONFILE ) or die "Couldn't load your cronfile - $CRONFILE";
-    $cron->run(detach=>1, catch=>1);
+    $cron->run(detach=>$FG?0:1, catch=>1);
+#     $cron->run();
 
     return 0;
 }
@@ -31,7 +32,21 @@ sub dispatcher {
 
     my $new_cmd = get_croon_cmd( $cmd );
 #     print "$new_cmd\n";
-    `$new_cmd`;
+    fork_cmd( $new_cmd );
+}
+
+sub fork_cmd {
+    my $cmd = shift;
+    my $pid = fork();
+    
+    return undef if($pid); #parent
+    return fkd_exec($cmd) if($pid==0); #child
+    return -1; #error
+}
+
+sub fkd_exec {
+    my $cmd = shift;
+    my $rc = system( $cmd );
 }
 
 sub get_croon_cmd {
@@ -137,11 +152,12 @@ sub read_config {
 
 sub get_opts {
 	my %o = ();
-    getopts('C:F:N:D:P',\%o);
+    getopts('C:F:N:D:PZ',\%o);
 
     $CRONFILE = $o{F} ? $o{F} : undef;
     $CONFIG = $o{C} ? $o{C} : undef;
     $DNICE = $o{N} ? $o{N} : 10;
     $DIO = $o{D} ? $o{D} : 4;
-    $SKIP_PROFILE = $o{P} ? 1 : 0;
+    $SKIP_PROFILE = defined $o{P} ? 1 : 0;
+    $FG = defined $o{Z} ? 1 : 0;
 }
