@@ -1,21 +1,38 @@
 #!/usr/bin/env perl
 
 do 'croon';
-use Test::Simple tests => 1;
+use Test::Simple tests => 10;
 use Data::Dumper;
 
 #test loggimg level
 Log::Log4perl->easy_init($INFO);
 
+$CONFIG = 'tests/conf.1';
+%CFG = read_cfg();
+$CRON = new Schedule::Cron(\&dummy_dispatcher);
+$CRON->load_crontab('tests/cron.1');   
+
 test_config();
+test_croon_cmd();
 
 sub test_config {
-    $CONFIG = 'tests/conf.1';
-    my %cfg = read_cfg();
-    foreach my $k ( keys %cfg ) {
+    foreach my $k ( keys %CFG ) {
         #test nice/ionice range adherence
-        ok( $cfg{$k}->{'nice'} <= 20 && $cfg{$k}->{'nice'} >= 0 && $DNICE <= 20 && $DNICE >= 0, "Nice ranges adhered to" );
-        ok( $cfg{$k}->{'ionice'} <= 7 && $cfg{$k}->{'ionice'} >= 0 && $IONICE <= 7 && $IONICE >= 0, "IONice ranges adhered to" );
+        ok( $CFG{$k}->{'nice'} <= 20 && $CFG{$k}->{'nice'} >= 0 && $DNICE <= 20 && $DNICE >= 0, "Nice ranges adhered to" );
+        ok( $CFG{$k}->{'ionice'} <= 7 && $CFG{$k}->{'ionice'} >= 0 && $IONICE <= 7 && $IONICE >= 0, "IONice ranges adhered to" );
 
     }
 }
+
+sub test_croon_cmd {
+    my @entries = $CRON->list_entries();
+    foreach my $r ( @entries ) {
+        my %e = %$r;
+        my @args = $e{'args'};
+        my $cmd = $args[0][0];
+        my $new_cmd = dispatcher( $cmd, 1 );
+#         print "$new_cmd\n";
+    }
+}
+
+sub dummy_dispatcher {}

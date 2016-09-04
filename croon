@@ -43,11 +43,15 @@ sub reload {
 }
 
 sub dispatcher {
-    my $cmd = shift;
+    my ( $cmd, $skip_fork ) = @_;
 
     my $new_cmd = get_croon_cmd( $cmd );
     $LOG->info("$cmd became $new_cmd");
-    fork_cmd( $new_cmd );
+    if( $skip_fork ) {
+        return $new_cmd;
+    } else {
+        fork_cmd( $new_cmd );
+    }
 }
 
 sub fork_cmd {
