@@ -6,19 +6,25 @@
 # *
 # * Copyright (C) 2016 - aadel112.com - A project by Aaron Adel    
 # */
-package croon;
-
 use Schedule::Cron;
 use Getopt::Std;
 use File::Basename;
+use Log::Log4perl qw(:easy);
 use Data::Dumper;
+
+# set minimum logging level
+Log::Log4perl->easy_init($WARN);
 
 main();
 
 sub main{
+    #instantiate singleton
+    $LOG = Log::Log4perl->get_logger();
+    #get cmdlien opts
     get_opts();
-
+    #read from config
     %CFG = read_cfg() if( -s $CONFIG );
+    #instantiate singketon
     $CRON = new Schedule::Cron(\&dispatcher);
     reload();
 }
@@ -26,6 +32,10 @@ sub main{
 sub reload {
     my $mtime = (stat $CRONFILE)[9];
     if(!$ST or $mtime > $ST) {
+
+        $LOG->info("Init loading of cron $CRONFILE") if(!$ST);
+        $LOG->info("$CRONFILE updated, reloading") if($ST);
+
         $CRON->load_crontab( $CRONFILE ) or die "Couldn't load your cronfile - $CRONFILE";
         $CRON->run(detach=>$FG?0:1, catch=>1);
         $ST = time;
@@ -36,7 +46,7 @@ sub dispatcher {
     my $cmd = shift;
 
     my $new_cmd = get_croon_cmd( $cmd );
-    print "$new_cmd\n";
+    $LOG->info("$cmd became $new_cmd");
     fork_cmd( $new_cmd );
 }
 
@@ -57,8 +67,8 @@ sub fkd_exec {
 sub get_croon_cmd {
     my $cmd = shift;
 
-
     my @actions = get_actions( $cmd );
+    $LOG->info("Cmd - $cmd, Actions - " . join( ', ', @actions ));
     foreach my $act ( @actions ) {
         my $time = get_timestr($act);
         my $nice = get_nicestr($act);
@@ -141,6 +151,8 @@ sub read_cfg {
         open my $fh, '<', $CONFIG or die "Cannot open $CONFIG: $!";
         while ( my $line = <$fh> ) {
             chomp $line;
+            next if( $line =~ /^(#|$)/ );
+            
             my ( $proc, $nice, $ionice, $prof ) = split /,/, $line;
             
             $nice = 0 if($nice < 0);
@@ -149,9 +161,9 @@ sub read_cfg {
             $ionice = 0 if($ionice > 7);
 
             my %tmp = (
-                'nice' => $nice,
-                'ionice' => $ionice,
-                'prof' => $prof
+                'nice' => int($nice),
+                'ionice' => int($ionice),
+                'prof' => int($prof)
             );
             $proc = basename( $proc );
             $ret{$proc} = \%tmp;
@@ -167,8 +179,13 @@ sub get_opts {
 
     $CRONFILE = $o{F} ? $o{F} : undef;
     $CONFIG = $o{C} ? $o{C} : undef;
-    $DNICE = $o{N} ? $o{N} : 10;
-    $DIO = $o{D} ? $o{D} : 4;
+    $DNICE = $o{N} ? int($o{N}): 10;
+    $DIO = $o{D} ? int($o{D}) : 4;
     $SKIP_PROFILE = defined $o{P} ? 1 : 0;
     $FG = defined $o{Z} ? 1 : 0;
+
+    $DNICE = 0 if($DNICE < 0);
+    $DNICE = 20 if($DNICE > 20);
+    $DIO = 0 if($DIO < 0);
+    $DIO = 0 if($DIO > 7);
 }
