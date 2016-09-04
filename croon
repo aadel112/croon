@@ -1,5 +1,4 @@
 #!/usr/bin/env perl
-
 #*!
 # * croon 0.1.0
 # * https://github.com/aadel112/croon/croon
@@ -19,19 +18,24 @@ sub main{
     get_opts();
     %CFG = read_cfg() if( -s $CONFIG );
 
-    my $cron = new Schedule::Cron(\&dispatcher);
-    $cron->load_crontab( $CRONFILE ) or die "Couldn't load your cronfile - $CRONFILE";
-    $cron->run(detach=>$FG?0:1, catch=>1);
-#     $cron->run();
+    $CRON = new Schedule::Cron(\&dispatcher);
+    reload();
+}
 
-    return 0;
+sub reload {
+    my $mtime = (stat $CRONFILE)[9];
+    if(!$ST or $mtime > $ST) {
+        $CRON->load_crontab( $CRONFILE ) or die "Couldn't load your cronfile - $CRONFILE";
+        $CRON->run(detach=>$FG?0:1, catch=>1);
+        $ST = time;
+    }
 }
 
 sub dispatcher {
     my $cmd = shift;
 
     my $new_cmd = get_croon_cmd( $cmd );
-#     print "$new_cmd\n";
+    print "$new_cmd\n";
     fork_cmd( $new_cmd );
 }
 
@@ -52,16 +56,14 @@ sub fkd_exec {
 sub get_croon_cmd {
     my $cmd = shift;
 
-    my $time = which('time');
-    my $ionice = which('ionice');
 
     my @actions = get_actions( $cmd );
-
     foreach my $act ( @actions ) {
-   
+        my $time = get_timestr($act);
         my $nice = get_nicestr($act);
+        my $ionice = get_ionicestr($act);
 
-        $cmd =~ s/$act/$time $nice $ionicestr $act/;
+        $cmd =~ s/$act/$time $nice $ionice $act/;
     }
     return $cmd;
 }
@@ -100,6 +102,8 @@ sub get_ionicestr {
 
 sub get_timestr {
     my $proc = basename( $_[0] );
+    return undef if( (!defined $CFG{$proc} && $SKIP_PROFILE) or !$CFG{$proc}->{'prof'} );
+
     my $time = which('time');
 
     return $time;
@@ -129,14 +133,20 @@ sub which {
     return $which; 
 }
 
-sub read_config {
+sub read_cfg {
     my %ret = ();
 	# processname, niceness, ioniceness, profile
     if( -s $CONFIG ) {
         open my $fh, '<', $CONFIG or die "Cannot open $CONFIG: $!";
         while ( my $line = <$fh> ) {
-            chomp;
+            chomp $line;
             my ( $proc, $nice, $ionice, $prof ) = split /,/, $line;
+            
+            $nice = 0 if($nice < 0);
+            $nice = 20 if($nice > 20);
+            $ionice = 0 if($ionice < 0);
+            $ionice = 0 if($ionice > 7);
+
             my %tmp = (
                 'nice' => $nice,
                 'ionice' => $ionice,
