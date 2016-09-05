@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+pod2html --infile croon > tmp/croon.html 
+python util/html2text.py tmp/croon.html > tmp/croon.md
+
+cp tmp/croon.md docs/index.md
