@@ -22,7 +22,7 @@ You can configure Croon as an init or upstart process. By default it runs in dae
 * -N - default nice priority (optional)
 * -D - default ionice priority (optional)
 * -P - whether or not to perpend time (optional)
-* -F - run in foreground instead of as daemon (optional)
+* -Z - run in foreground instead of as daemon (optional)
 
 ## Examples
 Here are some examples:
