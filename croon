@@ -4,6 +4,10 @@
 # * https://github.com/aadel112/croon/croon
 # * @license GNU v3
 # *
+# * @documentation This script tries to adhere to the 
+# * rules at https://cwiki.apache.org/confluence/display/VCL/Perl+Code+Style+Guidelines
+# * it uses daux for docs
+# *
 # * Copyright (C) 2016 - aadel112.com - A project by Aaron Adel    
 # */
 use Schedule::Cron;
@@ -17,6 +21,18 @@ Log::Log4perl->easy_init($WARN);
 
 main();
 
+#/////////////////////////////////////////////////////////////////////////////
+ 
+=head2 main
+ 
+ Parameters  : none
+ Returns     : int
+ Description : This routine runs everything.
+               It sets up the cron object and
+               reloads it with each iteration
+ 
+=cut
+
 sub main{
     #instantiate singleton
     $LOG = Log::Log4perl->get_logger();
@@ -28,6 +44,22 @@ sub main{
     $CRON = new Schedule::Cron(\&dispatcher);
     reload();
 }
+
+#/////////////////////////////////////////////////////////////////////////////
+ 
+=head2 reload
+ 
+ Parameters  : none
+ Returns     : int
+ Description : This sub checks the mtime of
+               cron file, and compares it
+               against the last load time
+               of the file from memory, and
+               reloads the file of it needs.
+               The first time, the sub loads 
+               it no matter what.
+ 
+=cut
 
 sub reload {
     my $mtime = (stat $CRONFILE)[9];
@@ -42,6 +74,21 @@ sub reload {
     }
 }
 
+#/////////////////////////////////////////////////////////////////////////////
+ 
+=head2 dispatcher
+ 
+ Parameters  : cmd - string, [ skip_fork - bool ]
+ Returns     : int
+ Description : Is called when the timespec
+               hits the now time
+               execs the cmd by forking it
+               Also prepends nice, ionice,
+               time to each piece it 
+               recognizes as a cmd
+ 
+=cut
+
 sub dispatcher {
     my ( $cmd, $skip_fork ) = @_;
 
@@ -54,6 +101,16 @@ sub dispatcher {
     }
 }
 
+#/////////////////////////////////////////////////////////////////////////////
+ 
+=head2 fork_cmd
+ 
+ Parameters  : cmd - string
+ Returns     : inty
+ Description : This sub forks the command off
+ 
+=cut
+
 sub fork_cmd {
     my $cmd = shift;
     my $pid = fork();
@@ -63,10 +120,33 @@ sub fork_cmd {
     return -1; #error
 }
 
-sub fkd_exec {
-    my $cmd = shift;
-    my $rc = system( $cmd );
-}
+#/////////////////////////////////////////////////////////////////////////////
+ 
+=head2 fkd_exec
+ 
+ Parameters  : cmd - string
+ Returns     : int
+ Description : runs the forked command
+ 
+=cut
+
+sub fkd_exec { system( $_[0] ) }
+
+#/////////////////////////////////////////////////////////////////////////////
+ 
+=head2 get_croon_cmd
+ 
+ Parameters  : cmd - string
+ Returns     : string
+ Description : This sub takes a cmd, and
+               prepends the time, nice, and 
+               ionice commands to it
+               to get performance metrics
+               , control priority to cpu on
+               busy systems, and control 
+               priority to io on busy systems
+ 
+=cut
 
 sub get_croon_cmd {
     my $cmd = shift;
@@ -83,6 +163,18 @@ sub get_croon_cmd {
     return $cmd;
 }
 
+#/////////////////////////////////////////////////////////////////////////////
+ 
+=head2 get_actions
+ 
+ Parameters  : cmd - string
+ Returns     : list
+ Description : takes a command and returns 
+               the actionable or executable
+               pieces
+ 
+=cut
+
 sub get_actions {
     my $cmd = shift;
 
@@ -95,6 +187,16 @@ sub get_actions {
     return @actions;
 }
 
+#/////////////////////////////////////////////////////////////////////////////
+ 
+=head2 get_nicestr
+ 
+ Parameters  : none
+ Returns     : boolean
+ Description : This is what the subroutine does. These lines must be 80
+ 
+=cut
+
 sub get_nicestr {
     my $proc = basename( $_[0] );
 
@@ -104,6 +206,18 @@ sub get_nicestr {
 
     return nice( $prio );
 }
+
+#/////////////////////////////////////////////////////////////////////////////
+ 
+=head2 my_subroutine_name
+ 
+ Parameters  : none
+ Returns     : boolean
+ Description : This is what the subroutine does. These lines must be 80
+               characters or less. Additional lines must be indented with
+               spaces, not tabs.
+ 
+=cut
 
 sub get_ionicestr {
     my $proc = basename( $_[0] );
@@ -115,6 +229,18 @@ sub get_ionicestr {
     return ionice( $prio );
 }
 
+#/////////////////////////////////////////////////////////////////////////////
+ 
+=head2 my_subroutine_name
+ 
+ Parameters  : none
+ Returns     : boolean
+ Description : This is what the subroutine does. These lines must be 80
+               characters or less. Additional lines must be indented with
+               spaces, not tabs.
+ 
+=cut
+
 sub get_timestr {
     my $proc = basename( $_[0] );
     return undef if( (!defined $CFG{$proc} && $SKIP_PROFILE) or !$CFG{$proc}->{'prof'} );
@@ -124,6 +250,18 @@ sub get_timestr {
     return $time;
 }
 
+#/////////////////////////////////////////////////////////////////////////////
+ 
+=head2 my_subroutine_name
+ 
+ Parameters  : none
+ Returns     : boolean
+ Description : This is what the subroutine does. These lines must be 80
+               characters or less. Additional lines must be indented with
+               spaces, not tabs.
+ 
+=cut
+
 sub nice {
     my ( $prio ) = @_;
     my $nice = which('nice');
@@ -131,6 +269,18 @@ sub nice {
 
     return "$nice -n$prio";
 }
+
+#/////////////////////////////////////////////////////////////////////////////
+ 
+=head2 my_subroutine_name
+ 
+ Parameters  : none
+ Returns     : boolean
+ Description : This is what the subroutine does. These lines must be 80
+               characters or less. Additional lines must be indented with
+               spaces, not tabs.
+ 
+=cut
 
 sub ionice {
 	my ( $prio ) = @_;
@@ -140,6 +290,18 @@ sub ionice {
     return "$ionice -n$prio";
 }
 
+#/////////////////////////////////////////////////////////////////////////////
+ 
+=head2 my_subroutine_name
+ 
+ Parameters  : none
+ Returns     : boolean
+ Description : This is what the subroutine does. These lines must be 80
+               characters or less. Additional lines must be indented with
+               spaces, not tabs.
+ 
+=cut
+
 sub which { 
     return undef if( $_[0] =~ /&/ );
     my $cmd = "which $_[0] 2>/dev/null";
@@ -147,6 +309,18 @@ sub which {
     chomp $which; 
     return $which; 
 }
+
+#/////////////////////////////////////////////////////////////////////////////
+ 
+=head2 my_subroutine_name
+ 
+ Parameters  : none
+ Returns     : boolean
+ Description : This is what the subroutine does. These lines must be 80
+               characters or less. Additional lines must be indented with
+               spaces, not tabs.
+ 
+=cut
 
 sub read_cfg {
     my %ret = ();
@@ -178,6 +352,18 @@ sub read_cfg {
     }
     return %ret;
 }
+
+#/////////////////////////////////////////////////////////////////////////////
+ 
+=head2 my_subroutine_name
+ 
+ Parameters  : none
+ Returns     : boolean
+ Description : This is what the subroutine does. These lines must be 80
+               characters or less. Additional lines must be indented with
+               spaces, not tabs.
+ 
+=cut
 
 sub get_opts {
 	my %o = ();
