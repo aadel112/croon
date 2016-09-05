@@ -24,7 +24,7 @@ You can configure Croon as an init or upstart process. By default it runs in dae
 * -P - whether or not to perpend time (optional)
 * -F - run in foreground instead of as daemon (optional)
 
-## Contributinf
+## Contributing
 If you'd like to contribute feel free. I'll take any contributions.
 
 ## Donating
