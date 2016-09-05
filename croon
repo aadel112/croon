@@ -191,9 +191,11 @@ sub get_actions {
  
 =head2 get_nicestr
  
- Parameters  : none
- Returns     : boolean
- Description : This is what the subroutine does. These lines must be 80
+ Parameters  : proc - string
+ Returns     : string
+ Description : prepends nice -n$prio
+               where prio is the default, or
+               overriden by the config
  
 =cut
 
@@ -209,13 +211,13 @@ sub get_nicestr {
 
 #/////////////////////////////////////////////////////////////////////////////
  
-=head2 my_subroutine_name
+=head2 grt_ionicestr
  
- Parameters  : none
- Returns     : boolean
- Description : This is what the subroutine does. These lines must be 80
-               characters or less. Additional lines must be indented with
-               spaces, not tabs.
+ Parameters  : proc - string
+ Returns     : string
+ Description : prepends ionice -n$prio
+               where prio is the default, or
+               overriden by the config
  
 =cut
 
@@ -231,13 +233,11 @@ sub get_ionicestr {
 
 #/////////////////////////////////////////////////////////////////////////////
  
-=head2 my_subroutine_name
+=head2 get_timestr
  
- Parameters  : none
- Returns     : boolean
- Description : This is what the subroutine does. These lines must be 80
-               characters or less. Additional lines must be indented with
-               spaces, not tabs.
+ Parameters  : proc - string
+ Returns     : string
+ Description : prepends time
  
 =cut
 
@@ -252,13 +252,11 @@ sub get_timestr {
 
 #/////////////////////////////////////////////////////////////////////////////
  
-=head2 my_subroutine_name
+=head2 nice
  
- Parameters  : none
- Returns     : boolean
- Description : This is what the subroutine does. These lines must be 80
-               characters or less. Additional lines must be indented with
-               spaces, not tabs.
+ Parameters  : prio - int
+ Returns     : string
+ Description : Builds nice -n$prio
  
 =cut
 
@@ -272,14 +270,12 @@ sub nice {
 
 #/////////////////////////////////////////////////////////////////////////////
  
-=head2 my_subroutine_name
- 
- Parameters  : none
- Returns     : boolean
- Description : This is what the subroutine does. These lines must be 80
-               characters or less. Additional lines must be indented with
-               spaces, not tabs.
- 
+=head2 ionice
+
+ Parameters  : prio - int
+ Returns     : string
+ Description : Builds ionice -n$prio
+
 =cut
 
 sub ionice {
@@ -292,13 +288,12 @@ sub ionice {
 
 #/////////////////////////////////////////////////////////////////////////////
  
-=head2 my_subroutine_name
+=head2 which
  
- Parameters  : none
- Returns     : boolean
- Description : This is what the subroutine does. These lines must be 80
-               characters or less. Additional lines must be indented with
-               spaces, not tabs.
+ Parameters  : cmd - string
+ Returns     : string
+ Description : Does a which of the exe to find
+               the absolute path
  
 =cut
 
@@ -312,13 +307,11 @@ sub which {
 
 #/////////////////////////////////////////////////////////////////////////////
  
-=head2 my_subroutine_name
+=head2 read_cfg
  
  Parameters  : none
- Returns     : boolean
- Description : This is what the subroutine does. These lines must be 80
-               characters or less. Additional lines must be indented with
-               spaces, not tabs.
+ Returns     : hash, k => proc, v => hashref
+ Description : builds the config stucture
  
 =cut
 
@@ -355,13 +348,12 @@ sub read_cfg {
 
 #/////////////////////////////////////////////////////////////////////////////
  
-=head2 my_subroutine_name
+=head2 get_opts
  
  Parameters  : none
- Returns     : boolean
- Description : This is what the subroutine does. These lines must be 80
-               characters or less. Additional lines must be indented with
-               spaces, not tabs.
+ Returns     : none
+ Description : reads the cmdline opts into
+               global variables
  
 =cut
 
