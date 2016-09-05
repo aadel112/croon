@@ -24,6 +24,24 @@ You can configure Croon as an init or upstart process. By default it runs in dae
 * -P - whether or not to perpend time (optional)
 * -F - run in foreground instead of as daemon (optional)
 
+## Examples
+Here are some examples:
+
+```
+# executes croon with the cron file examples/cron.sample, and the overidding config file examples/prio.cfg
+./croon -F examples/cron.sample -C examples/prio.cfg
+```
+
+```
+# executes croon with the cron file examples/cron.sample
+./croon -F examples/cron.sample
+```
+
+```
+# executes croon with the cron file examples/cron.sample, runs in the foreground
+./croon -F examples/cron.sample -Z
+```
+
 ## Contributing
 If you'd like to contribute feel free. I'll take any contributions.
 

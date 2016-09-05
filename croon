@@ -62,8 +62,9 @@ sub main{
 =cut
 
 sub reload {
-    my $mtime = (stat $CRONFILE)[9];
-    if(!$ST or $mtime > $ST) {
+    my $cron_mtime = (stat $CRONFILE)[9];
+    my $config_mtime = $CONFIG && -e $CONFIG ? (stat $CONFIG)[9] : 0;
+    if(!$ST or $cron_mtime > $ST or $config_mtime > $ST) {
 
         $LOG->info("Init loading of cron $CRONFILE") if(!$ST);
         $LOG->info("$CRONFILE updated, reloading") if($ST);
