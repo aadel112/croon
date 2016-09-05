@@ -28,7 +28,8 @@ You can configure Croon as an init or upstart process. By default it runs in dae
 Here are some examples:
 
 ```
-# executes croon with the cron file examples/cron.sample, and the overidding config file examples/prio.cfg
+# executes croon with the cron file examples/cron.sample, 
+# and the overidding config file examples/prio.cfg
 ./croon -F examples/cron.sample -C examples/prio.cfg
 ```
 
