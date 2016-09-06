@@ -43,6 +43,27 @@ Here are some examples:
 ./croon -F examples/cron.sample -Z
 ```
 
+## Installation
+Download croon from git
+
+Install cpanm
+```
+curl -L https://cpanmin.us | perl - --sudo App::cpanminus
+```
+
+Then install the dependencies
+
+```
+cpanm --installdeps .
+```
+
+Add the croon directory to your path eg:
+
+```
+d=`pwd`
+export PATH="$PATH:$d"
+```
+
 ## Contributing
 If you'd like to contribute feel free. I'll take any contributions.
 

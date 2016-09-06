@@ -2,3 +2,4 @@ out
 *.phar
 tmp
 *.tmp
+local/
