@@ -64,6 +64,11 @@ d=`pwd`
 export PATH="$PATH:$d"
 ```
 
+## Contributors
+Many thanks to the following contributors.
+
+@based2
+
 ## Contributing
 If you'd like to contribute feel free. I'll take any contributions.
 
